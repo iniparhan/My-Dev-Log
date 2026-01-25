@@ -48,6 +48,29 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Buat tabel jika casenya sudah ada tabel dengan nama yang sama sebelumnya
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(50) UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Another type kalo mau buat table
+CREATE TABLE Examinations (
+    student_id INT,
+    subject_name VARCHAR(50),
+	PRIMARY KEY (student_id, subject_name),
+	FOREIGN KEY (student_id) REFERENCES Students(student_id),
+	FOREIGN KEY (subject_name) REFERENCES Subjects(subject_name)
+);
+
+CREATE TABLE Examinations (
+    exam_id SERIAL PRIMARY KEY,
+    student_id INT REFERENCES Students(student_id),
+    subject_name VARCHAR(50) REFERENCES Subjects(subject_name)
+);
+
 -- Hapus tabel
 DROP TABLE users;
 

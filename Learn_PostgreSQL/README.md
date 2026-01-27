@@ -2,6 +2,7 @@
 
 Repository ini berisi langkah-langkah dasar untuk menjalankan PostgreSQL menggunakan Docker, serta contoh perintah SQL dan konsep database penting.
 
+
 ## Langkah-langkah Setup PostgreSQL dengan Docker
 
 ### 1. Membuat Container
@@ -19,7 +20,9 @@ Masuk ke PostgreSQL di dalam container:
 
 `docker exec -it learn-databases psql -U postgres`
 
+
 ## Dasar-dasar SQL di PostgreSQL
+
 
 ### Database
 
@@ -37,6 +40,7 @@ DROP DATABASE nama_database;
 \l
 ```
 
+
 ### Table (Tabel)
 
 ```sql
@@ -48,6 +52,8 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- ============================
+
 -- Buat tabel jika casenya sudah ada tabel dengan nama yang sama sebelumnya
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -55,6 +61,8 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(50) UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ============================
 
 -- Another type kalo mau buat table
 CREATE TABLE Examinations (
@@ -71,12 +79,40 @@ CREATE TABLE Examinations (
     subject_name VARCHAR(50) REFERENCES Subjects(subject_name)
 );
 
+-- ============================
+
+-- How to use ENUM
+CREATE TYPE gender_type AS ENUM ('Men', 'Woman');
+CREATE TABLE IF NOT EXISTS users (
+    customer_id INT PRIMARY KEY,
+    customer_name VARCHAR(255) NOT NULL,
+    .....
+)
+
+-- Case kalo mau ubah nama gender type-nya
+CREATE TYPE gender_type_new AS ENUM ('Male', 'Female');
+
+ALTER TABLE users
+ALTER COLUMN gender TYPE gender_type_new
+USING 
+  CASE 
+    WHEN gender = 'Men' THEN 'Male'::gender_type_new
+    WHEN gender = 'Woman' THEN 'Female'::gender_type_new
+  END;
+
+DROP TYPE gender_type;
+
+ALTER TYPE gender_type_new RENAME TO gender_type;
+
+-- ============================
+
 -- Hapus tabel
 DROP TABLE users;
 
 -- Lihat struktur tabel
 \d users
 ```
+
 
 ### Insert Data (Masukkan Data)
 
@@ -89,6 +125,7 @@ INSERT INTO users (name, email) VALUES
 ('Budi', 'budi@mail.com'),
 ('Citra', 'citra@mail.com');
 ```
+
 
 ### Select (Ambil Data)
 
@@ -109,6 +146,7 @@ SELECT * FROM users ORDER BY created_at DESC;
 SELECT * FROM users LIMIT 5;
 ```
 
+
 ### Update (Ubah Data)
 
 ```sql
@@ -122,6 +160,7 @@ UPDATE users
 SET email = name || '@example.com';
 ```
 
+
 ### Delete (Hapus Data)
 
 ```sql
@@ -131,6 +170,7 @@ DELETE FROM users WHERE name='Citra';
 -- Hapus semua data
 DELETE FROM users;
 ```
+
 
 ### Alter (Ubah Struktur Tabel)
 
@@ -143,7 +183,68 @@ ALTER TABLE users ALTER COLUMN age TYPE SMALLINT;
 
 -- Hapus kolom
 ALTER TABLE users DROP COLUMN age;
+
+-- Ubah tipe data
+ALTER TABLE product
+ALTER COLUMN price TYPE NUMERIC(12,2)
+USING price::NUMERIC;
+
+-- Set default value
+ALTER TABLE users
+ALTER COLUMN join_date SET DEFAULT CURRENT_TIMESTAMP;
+
+-- Hapus default
+ALTER TABLE users
+ALTER COLUMN join_date DROP DEFAULT;
+
+-- Set NOT NULL
+ALTER TABLE users
+ALTER COLUMN email SET NOT NULL;
+
+-- Drop NOT NULL
+ALTER TABLE users
+ALTER COLUMN city DROP NOT NULL;
+
+-- Tambah PRIMARY KEY
+ALTER TABLE users ADD PRIMARY KEY (customer_id);
+
+-- Tambah UNIQUE
+ALTER TABLE users ADD CONSTRAINT unique_email UNIQUE(email);
+
+-- Tambah FOREIGN KEY
+ALTER TABLE product
+ADD CONSTRAINT fk_category
+FOREIGN KEY (category_id)
+REFERENCES category(category_id);
+
+-- Hapus constraint
+ALTER TABLE users DROP CONSTRAINT unique_email;
+
+-- Rename tabel
+ALTER TABLE user_order RENAME TO orders;
+
+-- Rename kolom
+ALTER TABLE product RENAME COLUMN created_atp TO created_at;
+
+-- Tambah index
+CREATE INDEX idx_order_date ON user_order(order_date);
+
+-- Drop index
+DROP INDEX idx_order_date;
+
+-- Tambah value ENUM
+ALTER TYPE order_status ADD VALUE 'returned';
+
+-- Rename TYPE
+ALTER TYPE gender_type RENAME TO user_gender_type;
+
+-- Drop kolom
+ALTER TABLE users DROP COLUMN city;
+
+-- Drop tabel
+DROP TABLE product;
 ```
+
 
 ### Index (Optimasi Pencarian)
 
@@ -154,6 +255,7 @@ CREATE INDEX idx_users_name ON users(name);
 -- Hapus index
 DROP INDEX idx_users_name;
 ```
+
 
 ### Query Lanjutan & Aggregate Functions
 
@@ -172,6 +274,7 @@ SELECT AVG(age) AS rata_rata_umur FROM users;
 SELECT SUM(age) AS total_umur FROM users;
 ```
 
+
 ### Transaction (Transaksi)
 
 ```sql
@@ -188,6 +291,7 @@ COMMIT;
 ROLLBACK;
 ```
 
+
 ### Shortcut dan perintah psql
 
 ```sql
@@ -201,7 +305,9 @@ ROLLBACK;
 \q
 ```
 
+
 ## Konsep Database Lanjutan dengan Contoh Syntax
+
 
 ### JOIN (Menggabungkan Data dari Beberapa Tabel)
 
@@ -225,6 +331,7 @@ FROM users u
 LEFT JOIN orders o ON u.id = o.user_id;
 ```
 
+
 ### WHERE, ORDER BY, LIMIT (Filter, Urutkan, Batasi Hasil Query)
 
 ```sql
@@ -246,6 +353,7 @@ WHERE age > 20
 ORDER BY created_at DESC
 LIMIT 3;
 ```
+
 
 ### Database Design & Normalisasi
 
@@ -284,6 +392,7 @@ CREATE TABLE products (
     category_id INT REFERENCES categories(id)
 );
 ```
+
 
 ### Indexes (Optimasi Pencarian Data)
 
